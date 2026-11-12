@@ -48,6 +48,7 @@
     const t = $("#toast"); t.textContent = msg; t.classList.add("show");
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
   }
+  window.appToast = toast;
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); toast("Copied to clipboard"); }
     catch {

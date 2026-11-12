@@ -12,6 +12,41 @@
       .replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[^\x00-\xFF–—•…€]/g, "");
   }
 
+  const notify = msg => (window.appToast ? window.appToast(msg) : alert(msg));
+  const LIB_MISSING = "PDF library didn't load. Refresh the page and try again.";
+
+  /**
+   * Save without relying on jsPDF's built-in saver. Normal browsers get a download;
+   * iPhone/iPad and in-app browsers (WhatsApp, Instagram, …) block blob downloads,
+   * so there the PDF opens in a new tab where it can be saved or shared.
+   */
+  function savePdf(doc, filename) {
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    const ua = navigator.userAgent;
+    const inApp = /FBAN|FBAV|Instagram|WhatsApp|Line\/|Snapchat|; wv\)/i.test(ua);
+    const iOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (inApp || iOS || !("download" in HTMLAnchorElement.prototype)) {
+      const w = window.open(url, "_blank");
+      if (!w) location.href = url;
+      notify(inApp ? "PDF opened. If it doesn't, open this site in Chrome/Safari." : "PDF opened — use Share → Save to Files.");
+    } else {
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.rel = "noopener"; a.style.display = "none";
+      document.body.appendChild(a); a.click(); a.remove();
+      notify("Downloading " + filename);
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  }
+
+  // Run a PDF build, reporting any failure instead of failing silently.
+  function guarded(fn) {
+    return function (...args) {
+      if (!window.jspdf || !window.jspdf.jsPDF || !window.jspdf.jsPDF.API.autoTable) { notify(LIB_MISSING); return; }
+      try { fn(...args); } catch (e) { console.error(e); notify("Couldn't create the PDF: " + e.message); }
+    };
+  }
+
   function header(doc, title, subtitle) {
     const w = doc.internal.pageSize.getWidth();
     doc.setFillColor(...NAVY); doc.rect(0, 0, w, 74, "F");
@@ -64,11 +99,7 @@
    * ctx: { name, subtitle, details: [[label,url]], references: [[label,url]], highlights: [[label,url]],
    *        note, questions: [{lc,title,diff,freq,acc,topics,recent,premium,url}], extraTitle, extraRows }
    */
-  window.buildCompanyPdf = function (ctx) {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert("PDF library failed to load. Check your internet connection and retry.");
-      return;
-    }
+  window.buildCompanyPdf = guarded(function (ctx) {
     const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
     header(doc, ctx.name, ctx.subtitle);
     let y = 104;
@@ -131,12 +162,11 @@
 
     footer(doc);
     const file = (ctx.fileName || ctx.name).replace(/[^\w.-]+/g, "_") + ".pdf";
-    doc.save(file);
-  };
+    savePdf(doc, file);
+  });
 
   /** rows: [{name, type, count, site, linkedin}] — one table of every company with clickable links. */
-  window.buildDirectoryPdf = function (rows) {
-    if (!window.jspdf || !window.jspdf.jsPDF) { alert("PDF library failed to load. Check your internet connection and retry."); return; }
+  window.buildDirectoryPdf = guarded(function (rows) {
     const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
     const withQ = rows.filter(r => r.count).length;
     header(doc, "Company Directory", `${rows.length} companies · ${withQ} with LeetCode question lists · generated ${new Date().toLocaleDateString("en-IN")}`);
@@ -160,6 +190,6 @@
       }
     });
     footer(doc);
-    doc.save("Company_Directory.pdf");
-  };
+    savePdf(doc, "Company_Directory.pdf");
+  });
 })();
