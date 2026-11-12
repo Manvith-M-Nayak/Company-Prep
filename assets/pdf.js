@@ -133,4 +133,33 @@
     const file = (ctx.fileName || ctx.name).replace(/[^\w.-]+/g, "_") + ".pdf";
     doc.save(file);
   };
+
+  /** rows: [{name, type, count, site, linkedin}] — one table of every company with clickable links. */
+  window.buildDirectoryPdf = function (rows) {
+    if (!window.jspdf || !window.jspdf.jsPDF) { alert("PDF library failed to load. Check your internet connection and retry."); return; }
+    const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+    const withQ = rows.filter(r => r.count).length;
+    header(doc, "Company Directory", `${rows.length} companies · ${withQ} with LeetCode question lists · generated ${new Date().toLocaleDateString("en-IN")}`);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+    doc.text(doc.splitTextToSize("Qs = reported LeetCode questions (\u2013 = none yet; use the matching prep pack). Website and LinkedIn come from curated entries and Wikidata; blank = not found, search on the site instead.", doc.internal.pageSize.getWidth() - 72), 36, 98);
+    const short = u => clean(u).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+    doc.autoTable({
+      head: [["Company", "Type", "Qs", "Website", "LinkedIn"]],
+      body: rows.map(r => [clean(r.name), clean(r.type), r.count || "\u2013", short(r.site), r.linkedin ? short(r.linkedin).replace(/^linkedin\.com\/company\//, "") : ""]),
+      startY: 120, margin: { left: 36, right: 36, bottom: 40 },
+      styles: { font: "helvetica", fontSize: 7.5, cellPadding: 3, lineColor: [219, 226, 238], lineWidth: 0.4, overflow: "ellipsize" },
+      headStyles: { fillColor: NAVY, textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 247, 251] },
+      columnStyles: { 0: { cellWidth: 120, fontStyle: "bold" }, 1: { cellWidth: 110 }, 2: { cellWidth: 26, halign: "right" }, 3: { cellWidth: 140 }, 4: { cellWidth: 127 } },
+      didParseCell(d) { if (d.section === "body" && (d.column.index === 3 || d.column.index === 4)) d.cell.styles.textColor = [29, 79, 163]; },
+      didDrawCell(d) {
+        if (d.section !== "body") return;
+        const r = rows[d.row.index];
+        const url = d.column.index === 3 ? r.site : d.column.index === 4 ? r.linkedin : null;
+        if (url) doc.link(d.cell.x, d.cell.y, d.cell.width, d.cell.height, { url });
+      }
+    });
+    footer(doc);
+    doc.save("PESU_Company_Directory.pdf");
+  };
 })();

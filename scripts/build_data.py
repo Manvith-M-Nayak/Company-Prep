@@ -64,7 +64,25 @@ for p in src["packs"]:
         "q": [[add_problem(r), int(r["companies"] or 0)] for r in p["rows"]],
     })
 
-# acceptance missing for pack-only problems is fine (null)
+# Campus recruiters with no question data: new entries, or aliases of existing companies
+sys.path.insert(0, __import__("os").path.dirname(__file__))
+from extra_companies import items, KEEP_SEPARATE  # noqa: E402
+
+nrm = lambda s: re.sub(r"[^a-z0-9]", "", s.lower())
+existing = {nrm(c["n"]): c["n"] for c in companies}
+extras, aliases = [], {}
+for name, cat in items():
+    k = nrm(name)
+    if k in existing:
+        continue
+    cands = [] if name in KEEP_SEPARATE else sorted(
+        ((len(ek), v) for ek, v in existing.items() if len(ek) >= 4 and (k.startswith(ek) or ek.startswith(k))), reverse=True)
+    hit = cands[0][1] if cands else None
+    if hit:
+        aliases[name] = hit
+    elif k not in {nrm(e[0]) for e in extras}:
+        extras.append([name, cat])
+
 out = {
     "meta": {"companies": len(companies), "problems": len(problems), "snapshot": "20 Oct 2026",
              "verified": "5 Nov 2026"},
@@ -73,8 +91,11 @@ out = {
     "problems": problems,
     "companies": companies,
     "packs": packs,
+    "extras": extras,
+    "aliases": aliases,
 }
 json.dump(out, open(sys.argv[2], "w"), separators=(",", ":"), ensure_ascii=False)
+print(len(extras), "extra companies,", len(aliases), "aliases")
 print(len(companies), "companies,", len(problems), "problems,", len(topics), "topics")
 
 # Also emit a JS wrapper so the site works when opened straight from disk (file://)

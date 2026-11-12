@@ -70,16 +70,28 @@
     const c = byNorm.get(norm(name));
     (inf.aliases || []).forEach(a => { if (c && !byNorm.has(norm(a))) byNorm.set(norm(a), c); });
   });
-  // names we know about but have no question data for (curated + proxy table)
-  const extraNames = new Set();
-  Object.keys(INFO).forEach(n => { if (!byNorm.has(norm(n))) extraNames.add(n); });
-  R.proxies.forEach(p => p.names.forEach(n => { if (!byNorm.has(norm(n))) extraNames.add(n); }));
+  // aliases from the data build (e.g. "Citi" -> Citigroup)
+  Object.entries(D.aliases || {}).forEach(([a, target]) => { const c = byNorm.get(norm(target)); if (c && !byNorm.has(norm(a))) byNorm.set(norm(a), c); });
+  // campus recruiters with no question data: name -> category
+  const extras = new Map();
+  (D.extras || []).forEach(([n, cat]) => { if (!byNorm.has(norm(n))) extras.set(norm(n), { name: n, cat }); });
+  Object.entries(INFO).forEach(([n, inf]) => { if (!byNorm.has(norm(n)) && !extras.has(norm(n))) extras.set(norm(n), { name: n, cat: inf.category || "" }); });
+  R.proxies.forEach(p => p.names.forEach(n => { if (!byNorm.has(norm(n)) && !extras.has(norm(n))) extras.set(norm(n), { name: n, cat: "" }); }));
+  const extraNames = new Set([...extras.values()].map(e => e.name));
+  const extraList = [...extras.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const LINKS = window.COMPANY_LINKS || {};
 
   function findCompany(name) { return byNorm.get(norm(name)) || null; }
+  function findExtra(name) { return extras.get(norm(name)) || null; }
+  // Curated details win; Wikidata-sourced links fill the gaps.
   function infoFor(name) {
-    if (INFO[name]) return INFO[name];
-    const k = Object.keys(INFO).find(n => norm(n) === norm(name) || (INFO[n].aliases || []).some(a => norm(a) === norm(name)));
-    return k ? INFO[k] : {};
+    let cur = INFO[name];
+    if (!cur) {
+      const k = Object.keys(INFO).find(n => norm(n) === norm(name) || (INFO[n].aliases || []).some(a => norm(a) === norm(name)));
+      cur = k ? INFO[k] : {};
+    }
+    const wd = LINKS[name] || {};
+    return { site: wd.site, linkedin: wd.linkedin, x: wd.x, instagram: wd.instagram, facebook: wd.facebook, ...cur };
   }
   function proxyFor(name) { return R.proxies.find(p => p.names.some(n => norm(n) === norm(name))); }
 
@@ -321,8 +333,9 @@
     const totalSolved = Object.keys(solved).filter(k => D.problems[k]).length;
     const popular = ["Amazon", "Microsoft", "Google", "Flipkart", "Goldman Sachs", "Oracle", "Infosys", "TCS", "Adobe", "Aveva"];
     const potd = problemOfTheDay();
-    const catCount = c => companies.filter(x => x.cats.includes(c)).length;
-    const letters = [...new Set(companies.map(c => /[a-z]/i.test(c.name[0]) ? c.name[0].toUpperCase() : "#"))].sort();
+    const catCount = c => companies.filter(x => x.cats.includes(c)).length + extraList.filter(e => e.cat === c).length;
+    const first = n => /[a-z]/i.test(n[0]) ? n[0].toUpperCase() : "#";
+    const letters = [...new Set(companies.map(c => first(c.name)).concat(extraList.map(e => first(e.name))))].sort();
     const starredHTML = starred.length ? `<section class="section"><div class="section-head"><h2>Your tracked companies</h2><a href="#/progress">View progress →</a></div>
       <div class="grid grid-4">${starred.map(n => {
         const c = findCompany(n); const tot = c ? c.q.length : 0; const done = c ? c.q.filter(x => isSolved(x[0])).length : 0;
@@ -336,7 +349,8 @@
         ${searchBox()}
         <div class="quick">${popular.map(n => `<a href="#/c/${enc(n)}">${esc(n)}</a>`).join("")}</div>
         <div class="hero-stats">
-          <div><strong>${D.meta.companies}</strong><span>companies</span></div>
+          <div><strong>${companies.length + extraList.length}</strong><span>companies</span></div>
+          <div><strong>${companies.length}</strong><span>with question lists</span></div>
           <div><strong>${D.meta.problems.toLocaleString()}</strong><span>unique problems</span></div>
           <div><strong>${D.packs.length}</strong><span>prep packs</span></div>
           <div><strong>${totalSolved}</strong><span>solved by you</span></div>
@@ -363,7 +377,7 @@
         <div class="section-head"><h2>Browse by hiring type</h2><span class="muted small">Each type has a different OA pattern — see Resources.</span></div>
         <div class="grid grid-3">
           ${CATS.map((c, i) => `<a class="card cat-card" href="#/cat/${i}"><h3>${esc(CAT_SHORT[c])}</h3><span class="count">${catCount(c)}</span> <span class="muted small">companies</span></a>`).join("")}
-          <a class="card cat-card" href="#/cat/other"><h3>Other companies</h3><span class="count">${companies.filter(c => !c.cats.length).length}</span> <span class="muted small">companies</span></a>
+          <a class="card cat-card" href="#/cat/other"><h3>Other companies</h3><span class="count">${companies.filter(c => !c.cats.length).length + extraList.filter(e => !e.cat).length}</span> <span class="muted small">companies</span></a>
         </div>
       </section>
 
@@ -373,7 +387,8 @@
       </section>
 
       <section class="section">
-        <div class="section-head"><h2>All companies A–Z</h2></div>
+        <div class="section-head"><h2>All companies A–Z</h2><button class="btn sm ghost" id="dir-pdf">⬇ Company directory PDF</button></div>
+        <p class="small muted">Number = reported questions. Companies marked “–” have no question list yet; their page uses the closest prep pack.</p>
         <div class="chips" id="az">${letters.map((l, i) => `<button class="chip ${i === 1 ? "on" : ""}" data-l="${l}">${l}</button>`).join("")}</div>
         <div class="chips" id="azlist" style="margin-top:12px"></div>
       </section>`;
@@ -381,38 +396,54 @@
     wireSearch(app);
     $("#potd").addEventListener("change", e => { toggleSolved(potd.lc, e.target.checked); toast(e.target.checked ? "Nice! Marked solved" : "Unmarked"); });
     const drawAZ = l => {
-      $("#azlist").innerHTML = companies.filter(c => (/[a-z]/i.test(c.name[0]) ? c.name[0].toUpperCase() : "#") === l)
-        .map(c => `<a class="chip" href="#/c/${enc(c.name)}">${esc(c.name)} <span class="muted">${c.q.length}</span></a>`).join("");
+      const items = companies.filter(c => first(c.name) === l).map(c => [c.name, c.q.length])
+        .concat(extraList.filter(e => first(e.name) === l).map(e => [e.name, "–"]))
+        .sort((a, b) => a[0].localeCompare(b[0]));
+      $("#azlist").innerHTML = items.map(([n, k]) => `<a class="chip" href="#/c/${enc(n)}">${esc(n)} <span class="muted">${k}</span></a>`).join("");
       $$("#az button").forEach(b => b.classList.toggle("on", b.dataset.l === l));
     };
     $("#az").addEventListener("click", e => { const b = e.target.closest("button"); if (b) drawAZ(b.dataset.l); });
     drawAZ(letters.includes("A") ? "A" : letters[0]);
+    $("#dir-pdf").addEventListener("click", () => {
+      const all = companies.map(c => ({ name: c.name, cats: c.cats, count: c.q.length }))
+        .concat(extraList.map(e => ({ name: e.name, cats: e.cat ? [e.cat] : [], count: 0 })))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      window.buildDirectoryPdf(all.map(x => {
+        const inf = infoFor(x.name);
+        return { name: x.name, type: x.cats.map(k => CAT_SHORT[k]).join(", ") || "Other", count: x.count, site: inf.site || "", linkedin: inf.linkedin || "" };
+      }));
+    });
   }
 
   function viewCategory(id) {
     const cat = id === "other" ? null : CATS[+id];
     const list = companies.filter(c => cat ? c.cats.includes(cat) : !c.cats.length).sort((a, b) => b.q.length - a.q.length);
+    const noData = extraList.filter(e => cat ? e.cat === cat : !e.cat);
     const packIdx = cat ? CAT_PACK[cat] : undefined;
     const oa = R.oaFormats.find(o => cat && cat.toLowerCase().includes(o[0].split(" ")[0].toLowerCase()));
     app.innerHTML = `
       <div class="crumbs"><a href="#/">Home</a> / Hiring type</div>
       <h1>${esc(cat ? CAT_SHORT[cat] : "Other companies")}</h1>
-      <p class="muted">${list.length} companies, sorted by number of reported questions.</p>
+      <p class="muted">${list.length + noData.length} companies. ${list.length} have question lists, sorted by number of reported questions.</p>
       ${oa ? `<div class="note"><strong>Typical OA:</strong> ${esc(oa[1])}. <strong>Focus:</strong> ${esc(oa[2])}.</div>` : ""}
       ${packIdx != null ? `<p style="margin-top:12px"><a class="btn orange" href="#/packs/${packIdx}">Open the ${esc(D.packs[packIdx].n)}</a></p>` : ""}
       <div class="grid grid-4 section">${list.map(c => {
         const done = c.q.filter(x => isSolved(x[0])).length;
         const rec = c.q.filter(x => x[2]).length;
         return `<a class="card cat-card" href="#/c/${enc(c.name)}"><h3>${esc(c.name)}</h3><p class="small muted">${plural(c.q.length, "question")}${rec ? ` · <span style="color:var(--hard)">${rec} recent</span>` : ""}</p><div class="progress"><i style="width:${done / c.q.length * 100}%"></i></div></a>`;
-      }).join("")}</div>`;
+      }).join("")}</div>
+      ${noData.length ? `<section class="section"><h2>Also recruits — no question list yet</h2>
+        <p class="small muted">Their pages give the full prep sheet with questions from the closest prep pack.</p>
+        <div class="chips">${noData.map(e => `<a class="chip" href="#/c/${enc(e.name)}">${esc(e.name)}</a>`).join("")}</div></section>` : ""}`;
   }
 
   function viewCompany(rawName) {
     const c = findCompany(rawName);
-    const name = c ? c.name : rawName.trim();
+    const ex = c ? null : findExtra(rawName);
+    const name = c ? c.name : ex ? ex.name : rawName.trim();
     const inf = infoFor(name);
     const customCats = store.get("customCat", {});
-    let cats = c ? c.cats : (inf.category ? [inf.category] : (customCats[name] ? [customCats[name]] : []));
+    let cats = c ? c.cats : (inf.category ? [inf.category] : ex?.cat ? [ex.cat] : (customCats[name] ? [customCats[name]] : []));
     if (c && !cats.length && inf.category) cats = [inf.category];
     const proxy = proxyFor(name);
     // Question source: company data, or a fallback pack
@@ -452,7 +483,7 @@
       ${!c ? `<div class="note">
           <strong>${esc(name)}</strong> has no reliable company-tagged question list${proxy ? ` (type: ${esc(proxy.type)})` : ""}. The questions below come from the <strong>${esc(source)}</strong>${proxy ? `; also practise lists of ${proxy.use.map(u => findCompany(u) ? `<a href="#/c/${enc(u)}">${esc(u)}</a>` : esc(u)).join(", ")}` : ""}.
           Then read recent experiences on GfG, LeetCode Discuss and YouTube 2–3 weeks before the test.
-          ${!inf.category && !proxy ? `<div style="margin-top:8px">What kind of company is it?
+          ${!inf.category && !proxy && !ex?.cat ? `<div style="margin-top:8px">What kind of company is it?
             <select class="field" id="setcat"><option value="">Not sure (general Top 150)</option>${CATS.map(k => `<option ${cats[0] === k ? "selected" : ""} value="${esc(k)}">${esc(CAT_SHORT[k])}</option>`).join("")}</select></div>` : ""}
         </div>` : c.q.length < 10 ? `<div class="note">Only ${plural(c.q.length, "question")} reported for ${esc(name)}. After these, practise the ${cats[0] && CAT_PACK[cats[0]] != null ? `<a href="#/packs/${CAT_PACK[cats[0]]}">${esc(D.packs[CAT_PACK[cats[0]]].n)}</a>` : `<a href="#/packs/0">Top 150 most-asked</a>`}${sim.length ? ` and similar companies like <a href="#/c/${enc(sim[0].c.name)}">${esc(sim[0].c.name)}</a>` : ""}.</div>` : ""}
 
