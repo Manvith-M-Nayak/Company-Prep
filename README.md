@@ -37,7 +37,7 @@ python3 -m http.server 8000
 
 ## Data
 
-The questions come from `LeetCode_Questions_by_Company.pdf` (notes by Dr. Animesh Giri). To regenerate `data/questions.js` after the PDF is updated:
+The questions come from `LeetCode_Questions_by_Company.pdf` (notes by Dr. Animesh Giri). The PDF isn't committed, so put it in the repo root first. To regenerate `data/questions.js` after the PDF is updated:
 
 ```bash
 pip install pymupdf
