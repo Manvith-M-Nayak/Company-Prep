@@ -134,15 +134,19 @@
       i + 1, q.lc, clean(q.title) + (q.premium ? " (Premium)" : ""), q.diff,
       showFreq ? q.freq : (q.companies ?? ""), q.acc != null && q.acc !== "" ? q.acc + "%" : "", clean(q.topics), ""
     ]);
+    // Look rows up by identity: autotable gives split/continued rows index -1.
+    const qOf = new Map(body.map((row, i) => [row, qs[i]]));
+    const rowQ = data => qOf.get(data.row.raw) || qs[data.row.index];
     doc.autoTable({
-      head, body, startY: y, margin: { left: 36, right: 36, bottom: 40 },
+      head, body, startY: y, margin: { left: 36, right: 36, bottom: 40 }, rowPageBreak: "avoid",
       styles: { font: "helvetica", fontSize: 7.5, cellPadding: 3, valign: "middle", lineColor: [219, 226, 238], lineWidth: 0.4 },
       headStyles: { fillColor: NAVY, textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [245, 247, 251] },
       columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 30 }, 2: { cellWidth: 160 }, 3: { cellWidth: 46 }, 4: { cellWidth: 30 }, 5: { cellWidth: 34 }, 7: { cellWidth: 26 } },
       didParseCell(data) {
         if (data.section !== "body") return;
-        const q = qs[data.row.index];
+        const q = rowQ(data);
+        if (!q) return;
         if (data.column.index === 2) {
           data.cell.styles.textColor = q.recent ? [179, 38, 30] : [29, 79, 163];
           if (q.recent) data.cell.styles.fontStyle = "bold";
@@ -151,7 +155,8 @@
       },
       didDrawCell(data) {
         if (data.section !== "body") return;
-        const q = qs[data.row.index];
+        const q = rowQ(data);
+        if (!q) return;
         if (data.column.index === 2 && q.url) doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url: q.url });
         if (data.column.index === 7) {
           doc.setDrawColor(150); doc.setLineWidth(0.6);
@@ -173,10 +178,12 @@
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(doc.splitTextToSize("Qs = reported LeetCode questions (\u2013 = none yet; use the matching prep pack). Website and LinkedIn come from curated entries and Wikidata; blank = not found, search on the site instead.", doc.internal.pageSize.getWidth() - 72), 36, 98);
     const short = u => clean(u).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+    const dirBody = rows.map(r => [clean(r.name), clean(r.type), r.count || "\u2013", short(r.site), r.linkedin ? short(r.linkedin).replace(/^linkedin\.com\/company\//, "") : ""]);
+    const rOf = new Map(dirBody.map((row, i) => [row, rows[i]]));
     doc.autoTable({
       head: [["Company", "Type", "Qs", "Website", "LinkedIn"]],
-      body: rows.map(r => [clean(r.name), clean(r.type), r.count || "\u2013", short(r.site), r.linkedin ? short(r.linkedin).replace(/^linkedin\.com\/company\//, "") : ""]),
-      startY: 120, margin: { left: 36, right: 36, bottom: 40 },
+      body: dirBody,
+      startY: 120, margin: { left: 36, right: 36, bottom: 40 }, rowPageBreak: "avoid",
       styles: { font: "helvetica", fontSize: 7.5, cellPadding: 3, lineColor: [219, 226, 238], lineWidth: 0.4, overflow: "ellipsize" },
       headStyles: { fillColor: NAVY, textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [245, 247, 251] },
@@ -184,7 +191,8 @@
       didParseCell(d) { if (d.section === "body" && (d.column.index === 3 || d.column.index === 4)) d.cell.styles.textColor = [29, 79, 163]; },
       didDrawCell(d) {
         if (d.section !== "body") return;
-        const r = rows[d.row.index];
+        const r = rOf.get(d.row.raw) || rows[d.row.index];
+        if (!r) return;
         const url = d.column.index === 3 ? r.site : d.column.index === 4 ? r.linkedin : null;
         if (url) doc.link(d.cell.x, d.cell.y, d.cell.width, d.cell.height, { url });
       }
