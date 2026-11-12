@@ -520,7 +520,7 @@
       details: det.map(d => [d.label, d.url]), roles: $("#role").value,
       references: refs.map(r => [r.label, r.url]), highlights: hl.map(h => [h.label, h.url]),
       note: "NOTE: " + PREP_NOTE(name), questions: toPdfRows(list),
-      questionsTitle: c ? `${name} coding questions (${list.length})` : `${source} (${list.length})`
+      questionsTitle: c ? `${name} coding questions (${list.length})` : list.length === rows.length ? source : `${source} — filtered (${list.length})`
     });
     const table = questionTable($("#qt"), rows, { onChange: updateDone, onPdf: list => window.buildCompanyPdf(pdfCtx(list)) });
 
@@ -555,7 +555,7 @@
       <div class="company-head"><div><h1>${esc(p.n)}</h1><p class="muted">${esc(p.d)} “Companies” = how many company lists include the problem.</p></div>
       <div class="actions"><button class="btn orange" data-act="pdf">⬇ Download PDF</button></div></div>
       <div id="qt" class="section"></div>`;
-    const ctx = list => ({ name: p.n, subtitle: p.d, questions: toPdfRows(list), questionsTitle: `${p.n} (${list.length})` });
+    const ctx = list => ({ name: p.n, subtitle: p.d, questions: toPdfRows(list), questionsTitle: list.length === rows.length ? p.n : `${p.n} — filtered (${list.length})` });
     questionTable($("#qt"), rows, { onPdf: list => window.buildCompanyPdf(ctx(list)) });
     $("[data-act=pdf]").addEventListener("click", () => window.buildCompanyPdf(ctx(rows)));
   }

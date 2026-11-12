@@ -76,9 +76,11 @@
     if (ctx.details?.length) { y = sectionTitle(doc, y, "Organization details"); y = linkList(doc, y, ctx.details); }
     if (ctx.roles) {
       doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30);
-      doc.text("Role/s offered: ", 40, y - 4);
-      doc.setFont("helvetica", "normal"); doc.text(clean(ctx.roles), 40 + doc.getTextWidth("Role/s offered: "), y - 4);
-      y += 14;
+      const lead = `${(ctx.details?.length || 0) + 1}. Role/s Offered: `;
+      doc.text(lead, 40, y - 6);
+      const lw = doc.getTextWidth(lead);
+      doc.setFont("helvetica", "normal"); doc.text(clean(ctx.roles), 40 + lw, y - 6);
+      y += 12;
     }
     if (ctx.references?.length) { y = sectionTitle(doc, y, "Interview references"); y = linkList(doc, y, ctx.references); }
     if (ctx.highlights?.length) { y = sectionTitle(doc, y, "Interview highlights"); y = linkList(doc, y, ctx.highlights); }
@@ -91,10 +93,11 @@
 
     const qs = ctx.questions || [];
     y = sectionTitle(doc, y + 4, ctx.questionsTitle || `Coding questions (${qs.length})`);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text("Red titles = reported in the last 6 months (do these first). Freq 100 = this company's most-reported problem. Titles are clickable.", 36, y - 6);
-
     const showFreq = qs.some(q => q.freq !== "" && q.freq != null);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
+    doc.text(showFreq
+      ? "Red titles = reported in the last 6 months (do these first). Freq 100 = this company's most-reported problem. Titles are clickable."
+      : "Cos. = number of companies whose lists include the problem. Titles are clickable.", 36, y - 6);
     const head = [["#", "LC", "Problem", "Difficulty", showFreq ? "Freq" : "Cos.", "Acc.", "Topics", "Done"]];
     const body = qs.map((q, i) => [
       i + 1, q.lc, clean(q.title) + (q.premium ? " (Premium)" : ""), q.diff,
