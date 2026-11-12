@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PESU Placement Prep</title>
+  <meta name="description" content="Company-wise interview preparation for PES University students: LeetCode questions, interview references, prep highlights and downloadable PDFs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/">
+        <span class="brand-mark">PES</span>
+        <span class="brand-text">
+          <strong>Placement Prep</strong>
+          <small>PES University · unofficial student portal</small>
+        </span>
+      </a>
+      <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="#/" data-nav="home">Companies</a>
+        <a href="#/packs" data-nav="packs">Prep packs</a>
+        <a href="#/planner" data-nav="planner">Study planner</a>
+        <a href="#/compare" data-nav="compare">Compare</a>
+        <a href="#/progress" data-nav="progress">My progress</a>
+        <a href="#/resources" data-nav="resources">Resources</a>
+        <button class="theme-btn" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="container"></main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Question data: <em>LeetCode Questions by Company</em> notes by Dr. Animesh Giri, Placement Co-ordinator, PESU EC Campus (snapshot 20 Oct 2026, verified 5 Nov 2026). Treat these as patterns to practise, not a leaked question paper.</p>
+      <p>Unofficial student-built tool. Not affiliated with or endorsed by PES University. Progress is saved only in this browser.</p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="assets/company-info.js"></script>
+  <script src="assets/resources.js"></script>
+  <script src="assets/pdf.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
