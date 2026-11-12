@@ -16,9 +16,17 @@ It also has:
 - Progress tracking with export/import
 - Resources: OA formats, proxy lists for companies with no data, core CS subjects, aptitude, HR questions and a resume checklist
 
-Companies with no question data (for example Aveva) still get a full prep sheet. Their questions come from the closest category pack.
+About 940 companies are searchable: 692 with question lists and about 240 more campus recruiters. Companies with no question data (for example Aveva) still get a full prep sheet. Their questions come from the closest category pack.
 
-## Run
+## Deploy on Vercel
+
+1. Go to vercel.com → **Add New… → Project** → import `Company-Prep` from GitHub.
+2. Framework preset: **Other**. Leave the build command empty. The output directory is the repo root (`vercel.json` already sets this).
+3. Click **Deploy**. Every push to `main` redeploys automatically.
+
+Or from the terminal: `npx vercel --prod`.
+
+## Run locally
 
 There is no build step. Open `index.html` in a browser, or serve the folder:
 
@@ -35,7 +43,10 @@ The questions come from `LeetCode_Questions_by_Company_PES.pdf` (notes by Dr. An
 pip install pymupdf
 python scripts/parse_pdf.py LeetCode_Questions_by_Company_PES.pdf /tmp/parsed.json
 python scripts/build_data.py /tmp/parsed.json data/questions.json
+python scripts/enrich_wikidata.py data/questions.json data/links.json   # official links from Wikidata
 ```
+
+Companies that recruit on campus but have no LeetCode data are listed in `scripts/extra_companies.py`. To add more, put the name under the right category and rerun the two build commands.
 
 To add or correct a company's official links and roles, edit `assets/company-info.js`.
 
