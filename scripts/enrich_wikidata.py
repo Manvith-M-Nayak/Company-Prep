@@ -16,7 +16,7 @@ import urllib.parse
 import urllib.request
 
 ENDPOINT = "https://query.wikidata.org/sparql"
-UA = {"User-Agent": "PESUPlacementPrep/1.0 (student project; static site data build)",
+UA = {"User-Agent": "PlacementPrep/1.0 (student project; static site data build)",
       "Accept": "application/sparql-results+json"}
 ORG = re.compile(r"compan|corporat|firm\b|bank|business|manufactur|developer|provider|conglomerate|enterprise|start-?up|"
                  r"platform|retailer|consult|services|subsidiary|insur|fund|organi[sz]ation|brand|website|marketplace|"

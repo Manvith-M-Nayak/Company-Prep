@@ -46,7 +46,7 @@ window.RESOURCES = {
     ["Do you have any questions for us?", "Always ask 1–2: team's tech stack, what a new grad's first 90 days look like, how success is measured."]
   ],
   resume: [
-    "One page. PDF. File name: Name_PESU_Resume.pdf",
+    "One page. PDF. File name: Name_Resume.pdf",
     "Projects: action verb + what you built + tech + measurable result (e.g. 'reduced latency 40%').",
     "Put links (GitHub, LeetCode, LinkedIn, deployed project) at the top — make sure they work.",
     "Only list skills you can be grilled on; interviewers pick from your resume.",

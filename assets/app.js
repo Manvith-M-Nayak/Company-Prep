@@ -1,4 +1,4 @@
-/* PESU Placement Prep — single-page app (hash routing, no build step). */
+/* Placement Prep — single-page app (hash routing, no build step). */
 (function () {
   "use strict";
 
@@ -509,7 +509,7 @@
             ${linkListHTML(det)}
             <p style="margin:10px 0 0"><span class="lbl" style="font-weight:600">Role/s Offered:</span>
               <input class="role-input" id="role" value="${esc(roleFor(name, cats))}" title="Edit to match the placement notice — saved in this browser"></p>
-            <p class="small muted" style="margin:4px 0 0">${infoFor(name).roles ? "" : "Typical roles for this kind of company. "}Edit to match the PESU placement notice.</p>
+            <p class="small muted" style="margin:4px 0 0">${infoFor(name).roles ? "" : "Typical roles for this kind of company. "}Edit to match the placement notice.</p>
             <p class="small muted" style="margin:4px 0 0">Links come from a curated list${LINKS[name] ? ` and <a href="https://www.wikidata.org/wiki/${esc(LINKS[name].wd)}" target="_blank" rel="noopener">Wikidata</a>` : ""}. Ones marked “search” weren't found — check the result before using it.</p>
           </div>
           <div class="card accent">
@@ -691,7 +691,7 @@
       </div>`;
     $("#exp").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify({ solved, starred, roles: store.get("roles", {}), customCat: store.get("customCat", {}) }, null, 1)], { type: "application/json" });
-      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "pesu-prep-progress.json"; a.click(); URL.revokeObjectURL(a.href);
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "placement-prep-progress.json"; a.click(); URL.revokeObjectURL(a.href);
     });
     $("#imp").addEventListener("change", async e => {
       try {
@@ -751,7 +751,7 @@
     $(".nav").classList.remove("open");
     window.scrollTo(0, 0);
     if (!p0) viewHome();
-    else if (p0 === "c" && p1) { viewCompany(p1); document.title = `${p1} · PESU Placement Prep`; return; }
+    else if (p0 === "c" && p1) { viewCompany(p1); document.title = `${p1} · Placement Prep`; return; }
     else if (p0 === "cat") viewCategory(p1);
     else if (p0 === "packs") viewPacks(p1);
     else if (p0 === "planner") viewPlanner();
@@ -759,7 +759,7 @@
     else if (p0 === "progress") viewProgress();
     else if (p0 === "resources") viewResources();
     else viewNotFound();
-    document.title = "PESU Placement Prep";
+    document.title = "Placement Prep";
   }
   window.addEventListener("hashchange", route);
 

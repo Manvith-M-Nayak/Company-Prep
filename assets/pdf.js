@@ -17,7 +17,7 @@
     doc.setFillColor(...NAVY); doc.rect(0, 0, w, 74, "F");
     doc.setFillColor(...ORANGE); doc.rect(0, 74, w, 5, "F");
     doc.setFillColor(...ORANGE); doc.roundedRect(36, 20, 40, 34, 5, 5, "F");
-    doc.setTextColor(255); doc.setFont("times", "bold"); doc.setFontSize(14); doc.text("PES", 56, 42, { align: "center" });
+    doc.setTextColor(255); doc.setFont("times", "bold"); doc.setFontSize(14); doc.text("PP", 56, 42, { align: "center" });
     doc.setFontSize(20); doc.text(clean(title), 88, 38);
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(200, 214, 240);
     doc.text(clean(subtitle), 88, 55);
@@ -29,7 +29,7 @@
     for (let i = 1; i <= n; i++) {
       doc.setPage(i);
       doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUTED);
-      doc.text("PESU Placement Prep (unofficial) · Data: LeetCode Questions by Company, Dr. Animesh Giri, PESU EC Campus", 36, h - 18);
+      doc.text("Placement Prep · Data: LeetCode Questions by Company, Dr. Animesh Giri", 36, h - 18);
       doc.text(`Page ${i} of ${n}`, w - 36, h - 18, { align: "right" });
     }
   }
@@ -160,6 +160,6 @@
       }
     });
     footer(doc);
-    doc.save("PESU_Company_Directory.pdf");
+    doc.save("Company_Directory.pdf");
   };
 })();

@@ -1,6 +1,6 @@
-# PESU Placement Prep
+# Placement Prep
 
-Company-wise interview preparation site for PES University students. Type a company name and get:
+Company-wise interview preparation site for campus placements. Type a company name and get:
 
 - **Organization details**: website, careers, LinkedIn, Facebook, X, Instagram, and the roles offered (you can edit the role to match the placement notice)
 - **Interview references**: GeeksForGeeks, AmbitionBox, LeetCode Discuss, Glassdoor, YouTube, Reddit
@@ -37,11 +37,11 @@ python3 -m http.server 8000
 
 ## Data
 
-The questions come from `LeetCode_Questions_by_Company_PES.pdf` (notes by Dr. Animesh Giri, PESU EC Campus). To regenerate `data/questions.js` after the PDF is updated:
+The questions come from `LeetCode_Questions_by_Company.pdf` (notes by Dr. Animesh Giri). To regenerate `data/questions.js` after the PDF is updated:
 
 ```bash
 pip install pymupdf
-python scripts/parse_pdf.py LeetCode_Questions_by_Company_PES.pdf /tmp/parsed.json
+python scripts/parse_pdf.py LeetCode_Questions_by_Company.pdf /tmp/parsed.json
 python scripts/build_data.py /tmp/parsed.json data/questions.json
 python scripts/enrich_wikidata.py data/questions.json data/links.json   # official links from Wikidata
 ```
@@ -49,5 +49,3 @@ python scripts/enrich_wikidata.py data/questions.json data/links.json   # offici
 Companies that recruit on campus but have no LeetCode data are listed in `scripts/extra_companies.py`. To add more, put the name under the right category and rerun the two build commands.
 
 To add or correct a company's official links and roles, edit `assets/company-info.js`.
-
-This is an unofficial tool built by a student. It is not affiliated with PES University.

@@ -2,7 +2,7 @@
 
 Usage:
     pip install pymupdf
-    python scripts/parse_pdf.py LeetCode_Questions_by_Company_PES.pdf /tmp/parsed.json
+    python scripts/parse_pdf.py LeetCode_Questions_by_Company.pdf /tmp/parsed.json
     python scripts/build_data.py /tmp/parsed.json data/questions.json
 """
 import json

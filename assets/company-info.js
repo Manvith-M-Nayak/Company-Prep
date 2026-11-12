@@ -1,5 +1,5 @@
 /*
- * Curated organisation details for frequent PESU recruiters.
+ * Curated organisation details for frequent campus recruiters.
  * Only fields we are confident about are filled. Anything missing falls back to
  * a search link (clearly marked "search" in the UI) instead of a guessed URL.
  *
@@ -155,7 +155,7 @@ window.CATEGORY_HIGHLIGHTS = {
   ]
 };
 
-/** Always-useful prep links (from the PESU prep template). */
+/** Always-useful prep links (from the prep template). */
 window.CORE_HIGHLIGHTS = [
   ["All-in-one Core Preparation Materials", "https://www.geeksforgeeks.org/interview-preparation/"],
   ["All-in-one MCQ Preparation Material", "https://www.sanfoundry.com/"],
