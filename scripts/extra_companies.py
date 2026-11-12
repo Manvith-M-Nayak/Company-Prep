@@ -73,3 +73,6 @@ def items():
             name = " ".join(name.split())
             if name and name not in DROP:
                 yield name, CAT_CODES[code]
+
+# Same company as a short existing name the prefix rule can't catch safely.
+FORCE_ALIAS = {"HCLTech": "HCL", "LTIMindtree": "LTI", "NCR Voyix": "NCR", "Jio Platforms": "Jio", "IMC Trading": "IMC"}

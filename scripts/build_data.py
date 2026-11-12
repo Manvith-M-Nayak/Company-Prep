@@ -66,7 +66,7 @@ for p in src["packs"]:
 
 # Campus recruiters with no question data: new entries, or aliases of existing companies
 sys.path.insert(0, __import__("os").path.dirname(__file__))
-from extra_companies import items, KEEP_SEPARATE  # noqa: E402
+from extra_companies import items, KEEP_SEPARATE, FORCE_ALIAS  # noqa: E402
 
 nrm = lambda s: re.sub(r"[^a-z0-9]", "", s.lower())
 existing = {nrm(c["n"]): c["n"] for c in companies}
@@ -74,6 +74,9 @@ extras, aliases = [], {}
 for name, cat in items():
     k = nrm(name)
     if k in existing:
+        continue
+    if name in FORCE_ALIAS:
+        aliases[name] = FORCE_ALIAS[name]
         continue
     cands = [] if name in KEEP_SEPARATE else sorted(
         ((len(ek), v) for ek, v in existing.items() if len(ek) >= 4 and (k.startswith(ek) or ek.startswith(k))), reverse=True)

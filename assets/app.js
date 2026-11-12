@@ -510,6 +510,7 @@
             <p style="margin:10px 0 0"><span class="lbl" style="font-weight:600">Role/s Offered:</span>
               <input class="role-input" id="role" value="${esc(roleFor(name, cats))}" title="Edit to match the placement notice — saved in this browser"></p>
             <p class="small muted" style="margin:4px 0 0">${infoFor(name).roles ? "" : "Typical roles for this kind of company. "}Edit to match the PESU placement notice.</p>
+            <p class="small muted" style="margin:4px 0 0">Links come from a curated list${LINKS[name] ? ` and <a href="https://www.wikidata.org/wiki/${esc(LINKS[name].wd)}" target="_blank" rel="noopener">Wikidata</a>` : ""}. Ones marked “search” weren't found — check the result before using it.</p>
           </div>
           <div class="card accent">
             <h3>Interview references</h3>
